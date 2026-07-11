@@ -7,7 +7,7 @@ function popupUid(prefix) {
 async function init() {
   const status = document.getElementById('status');
   const row = document.getElementById('site-row');
-  const label = document.getElementById('site-label');
+  const pathLabel = document.getElementById('site-path');
   const toggle = document.getElementById('site-toggle');
 
   // Open options.html as a plain tab instead of chrome.runtime.openOptionsPage():
@@ -37,7 +37,7 @@ async function init() {
 
   const config = await lntLoadConfig();
 
-  // Site entries whose pattern matches the current page, enabled or not.
+  // Site cards whose pattern matches the current page, enabled or not.
   const matchingSites = () => config.sites.filter(
     (site) => site.pattern && lntCompilePattern(site.pattern).test(url.href),
   );
@@ -48,18 +48,25 @@ async function init() {
     toggle.checked = active;
   };
 
-  label.textContent = 'Open links in new tab on ' + url.hostname;
+  pathLabel.textContent = url.host + url.pathname;
   row.hidden = false;
 
-  // The toggle disables matching site entries rather than deleting them, so
-  // flipping it back restores exactly what was there before.
+  // The toggle disables matching site cards rather than deleting them, so
+  // flipping it back restores exactly what was there before. A brand-new site
+  // is scoped to this page's path, matching what the label shows.
   toggle.addEventListener('change', async () => {
     const matched = matchingSites();
     if (toggle.checked) {
       if (matched.length) {
         matched.forEach((site) => { site.enabled = true; });
       } else {
-        config.sites.push({ id: popupUid('s'), pattern: url.origin + '/*', enabled: true });
+        config.sites.push({
+          id: popupUid('s'),
+          pattern: url.origin + url.pathname + '*',
+          enabled: true,
+          defaultAction: 'new-tab',
+          rules: [],
+        });
       }
     } else {
       matched.forEach((site) => { site.enabled = false; });

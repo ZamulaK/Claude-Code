@@ -9,52 +9,28 @@
 <body class="options">
   <h1>Auto New Tab</h1>
   <p class="hint">
-    Choose the sites where the extension is active. On those sites, tapped links
-    open in a new tab unless a rule says otherwise. Changes save automatically.
+    Each card below is a place where the extension is active. When you tap a
+    link there, the card&rsquo;s first matching rule (top to bottom) decides where it
+    opens; links matching no rule use the card&rsquo;s &ldquo;Other Links&rdquo; setting.
+    &ldquo;Same Tab&rdquo; means the link is left alone. Changes save automatically.
   </p>
 
   <section>
-    <h2>Active sites</h2>
+    <h2>Active Sites</h2>
     <p class="hint">
-      Patterns match the page URL. <code>*</code> is a wildcard, e.g.
+      Patterns match URLs, with <code>*</code> as a wildcard, e.g.
       <code>https://example.com/account/*</code>.
     </p>
     <div id="site-list"></div>
     <form id="site-add" class="row add">
       <input type="text" id="site-pattern" class="pattern" placeholder="https://example.com/*"
              autocomplete="off" spellcheck="false" required>
-      <button type="submit">Add</button>
+      <button type="submit">Add Site</button>
     </form>
   </section>
 
   <section>
-    <h2>Link rules</h2>
-    <p class="hint">
-      When you tap a link on an active site, the first matching rule (top to
-      bottom) decides. &ldquo;Same tab&rdquo; leaves the link alone. Links matching no
-      rule use the default action.
-    </p>
-    <div id="rule-list"></div>
-    <form id="rule-add" class="row add">
-      <input type="text" id="rule-pattern" class="pattern" placeholder="*confirmationNumber=*"
-             autocomplete="off" spellcheck="false" required>
-      <select id="rule-action">
-        <option value="new-tab">New tab</option>
-        <option value="same-tab">Same tab</option>
-      </select>
-      <button type="submit">Add</button>
-    </form>
-    <div class="row spaced">
-      <label for="default-action">Default for unmatched links</label>
-      <select id="default-action">
-        <option value="new-tab">New tab</option>
-        <option value="same-tab">Same tab</option>
-      </select>
-    </div>
-  </section>
-
-  <section>
-    <h2>Try it</h2>
+    <h2>Try It</h2>
     <div class="stack">
       <input type="text" id="test-page" placeholder="Page URL, e.g. https://www.google.com/search?q=hotels"
              autocomplete="off" spellcheck="false">
@@ -65,12 +41,12 @@
   </section>
 
   <section>
-    <h2>Backup &amp; reset</h2>
+    <h2>Backup &amp; Reset</h2>
     <div class="row">
       <button id="export" type="button">Export JSON</button>
       <button id="import-button" type="button">Import JSON</button>
       <input type="file" id="import-file" accept=".json,application/json" hidden>
-      <button id="reset" type="button" class="danger">Reset to defaults</button>
+      <button id="reset" type="button" class="danger">Reset to Defaults</button>
     </div>
   </section>
 

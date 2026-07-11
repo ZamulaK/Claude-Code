@@ -7,20 +7,21 @@ function uid(prefix) {
 }
 
 function normalize(cfg) {
-  cfg.version = 1;
-  if (cfg.defaultAction !== 'same-tab') cfg.defaultAction = 'new-tab';
+  cfg = lntMigrateConfig(cfg);
+  cfg.version = 2;
   cfg.sites = (Array.isArray(cfg.sites) ? cfg.sites : [])
     .filter((s) => s && typeof s.pattern === 'string');
-  cfg.linkRules = (Array.isArray(cfg.linkRules) ? cfg.linkRules : [])
-    .filter((r) => r && typeof r.pattern === 'string');
-  for (const s of cfg.sites) {
-    if (!s.id) s.id = uid('s');
-    s.enabled = s.enabled !== false;
-  }
-  for (const r of cfg.linkRules) {
-    if (!r.id) r.id = uid('r');
-    r.enabled = r.enabled !== false;
-    if (r.action !== 'same-tab') r.action = 'new-tab';
+  for (const site of cfg.sites) {
+    if (!site.id) site.id = uid('s');
+    site.enabled = site.enabled !== false;
+    if (site.defaultAction !== 'same-tab') site.defaultAction = 'new-tab';
+    site.rules = (Array.isArray(site.rules) ? site.rules : [])
+      .filter((r) => r && typeof r.pattern === 'string');
+    for (const rule of site.rules) {
+      if (!rule.id) rule.id = uid('r');
+      rule.enabled = rule.enabled !== false;
+      if (rule.action !== 'same-tab') rule.action = 'new-tab';
+    }
   }
   return cfg;
 }
@@ -58,10 +59,118 @@ function patternInput(item) {
   return input;
 }
 
+function actionSelect(item) {
+  const select = el('select', {},
+    el('option', { value: 'new-tab', textContent: 'New Tab', selected: item.action !== 'same-tab' }),
+    el('option', { value: 'same-tab', textContent: 'Same Tab', selected: item.action === 'same-tab' }),
+  );
+  select.addEventListener('change', () => {
+    item.action = select.value;
+    save();
+  });
+  return select;
+}
+
 function iconButton(label, title, onClick) {
   const button = el('button', { type: 'button', className: 'icon', textContent: label, title });
   button.addEventListener('click', onClick);
   return button;
+}
+
+function moveButtons(list, index, item, rerender) {
+  const move = (delta) => () => {
+    list.splice(index, 1);
+    list.splice(index + delta, 0, item);
+    save();
+    rerender();
+  };
+  const up = iconButton('↑', 'Move Up', move(-1));
+  const down = iconButton('↓', 'Move Down', move(1));
+  up.disabled = index === 0;
+  down.disabled = index === list.length - 1;
+  return [up, down];
+}
+
+function renderRules(site, container) {
+  container.textContent = '';
+  if (!site.rules.length) {
+    container.append(el('p', { className: 'hint', textContent: 'No rules — every link here uses the Other Links setting.' }));
+  }
+  site.rules.forEach((rule, index) => {
+    container.append(el('div', { className: 'row' },
+      enabledCheckbox(rule),
+      patternInput(rule),
+      actionSelect(rule),
+      ...moveButtons(site.rules, index, rule, () => renderRules(site, container)),
+      iconButton('✕', 'Delete', () => {
+        if (!confirm(`Delete rule “${rule.pattern}”?`)) return;
+        site.rules = site.rules.filter((r) => r !== rule);
+        save();
+        renderRules(site, container);
+      }),
+    ));
+  });
+}
+
+function renderSiteCard(site, index) {
+  const card = el('div', { className: 'card' });
+
+  const header = el('div', { className: 'row card-header' },
+    enabledCheckbox(site),
+    patternInput(site),
+    ...moveButtons(config.sites, index, site, renderSites),
+    iconButton('✕', 'Delete', () => {
+      if (!confirm(`Delete site “${site.pattern}” and its ${site.rules.length} rule(s)?`)) return;
+      config.sites = config.sites.filter((s) => s !== site);
+      save();
+      renderSites();
+    }),
+  );
+
+  const rules = el('div', { className: 'rules' });
+  renderRules(site, rules);
+
+  const addPattern = el('input', {
+    type: 'text', className: 'pattern', placeholder: '*confirmationNumber=*',
+    autocomplete: 'off', spellcheck: false,
+  });
+  const addAction = el('select', {},
+    el('option', { value: 'new-tab', textContent: 'New Tab' }),
+    el('option', { value: 'same-tab', textContent: 'Same Tab' }),
+  );
+  const addButton = el('button', { type: 'button', textContent: 'Add Rule' });
+  const addRule = () => {
+    const pattern = addPattern.value.trim();
+    if (!pattern) return;
+    site.rules.push({ id: uid('r'), pattern, action: addAction.value, enabled: true });
+    addPattern.value = '';
+    save();
+    renderRules(site, rules);
+  };
+  addButton.addEventListener('click', addRule);
+  addPattern.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addRule(); }
+  });
+
+  const otherSelect = el('select', {},
+    el('option', { value: 'new-tab', textContent: 'New Tab', selected: site.defaultAction !== 'same-tab' }),
+    el('option', { value: 'same-tab', textContent: 'Same Tab', selected: site.defaultAction === 'same-tab' }),
+  );
+  otherSelect.addEventListener('change', () => {
+    site.defaultAction = otherSelect.value;
+    save();
+  });
+
+  card.append(
+    header,
+    rules,
+    el('div', { className: 'row add' }, addPattern, addAction, addButton),
+    el('div', { className: 'row spaced' },
+      el('span', { className: 'other-label', textContent: 'Other Links Open In' }),
+      otherSelect,
+    ),
+  );
+  return card;
 }
 
 function renderSites() {
@@ -70,62 +179,7 @@ function renderSites() {
   if (!config.sites.length) {
     list.append(el('p', { className: 'hint', textContent: 'No sites yet — the extension is inactive everywhere.' }));
   }
-  for (const site of config.sites) {
-    list.append(el('div', { className: 'row' },
-      enabledCheckbox(site),
-      patternInput(site),
-      iconButton('✕', 'Delete', () => {
-        if (!confirm(`Delete site pattern “${site.pattern}”?`)) return;
-        config.sites = config.sites.filter((s) => s !== site);
-        save();
-        renderSites();
-      }),
-    ));
-  }
-}
-
-function renderRules() {
-  const list = document.getElementById('rule-list');
-  list.textContent = '';
-  if (!config.linkRules.length) {
-    list.append(el('p', { className: 'hint', textContent: 'No rules — every link on active sites uses the default action.' }));
-  }
-  config.linkRules.forEach((rule, index) => {
-    const action = el('select', {},
-      el('option', { value: 'new-tab', textContent: 'New tab', selected: rule.action === 'new-tab' }),
-      el('option', { value: 'same-tab', textContent: 'Same tab', selected: rule.action === 'same-tab' }),
-    );
-    action.addEventListener('change', () => {
-      rule.action = action.value;
-      save();
-    });
-
-    const move = (delta) => () => {
-      const target = index + delta;
-      config.linkRules.splice(index, 1);
-      config.linkRules.splice(target, 0, rule);
-      save();
-      renderRules();
-    };
-    const up = iconButton('↑', 'Move up', move(-1));
-    const down = iconButton('↓', 'Move down', move(1));
-    up.disabled = index === 0;
-    down.disabled = index === config.linkRules.length - 1;
-
-    list.append(el('div', { className: 'row' },
-      enabledCheckbox(rule),
-      patternInput(rule),
-      action,
-      up,
-      down,
-      iconButton('✕', 'Delete', () => {
-        if (!confirm(`Delete rule “${rule.pattern}”?`)) return;
-        config.linkRules = config.linkRules.filter((r) => r !== rule);
-        save();
-        renderRules();
-      }),
-    ));
-  });
+  config.sites.forEach((site, index) => list.append(renderSiteCard(site, index)));
 }
 
 function updateTester() {
@@ -138,17 +192,17 @@ function updateTester() {
   }
   const compiled = lntCompileConfig(config);
   const lines = [];
-  let active = true;
+  let site = null;
   if (pageUrl) {
-    active = lntIsActiveOn(compiled, pageUrl);
-    lines.push(active
-      ? 'Page matches an active site.'
+    site = lntSiteForPage(compiled, pageUrl);
+    lines.push(site
+      ? `Page is governed by the site card “${site.pattern}”.`
       : 'Page matches no active site — links there are left alone.');
   }
-  if (linkUrl && active) {
-    const rule = lntRuleForLink(compiled, linkUrl);
-    const action = rule ? rule.action : compiled.defaultAction;
-    const why = rule ? `rule “${rule.pattern}”` : 'the default action';
+  if (linkUrl && site) {
+    const rule = lntRuleForLink(site, linkUrl);
+    const action = rule ? rule.action : site.defaultAction;
+    const why = rule ? `rule “${rule.pattern}”` : 'the Other Links setting';
     lines.push(`Link opens in a ${action === 'new-tab' ? 'new tab' : 'same tab (left alone)'} — decided by ${why}.`);
   }
   out.textContent = lines.join(' ');
@@ -160,32 +214,10 @@ function wireForms() {
     const input = document.getElementById('site-pattern');
     const pattern = input.value.trim();
     if (!pattern) return;
-    config.sites.push({ id: uid('s'), pattern, enabled: true });
+    config.sites.push({ id: uid('s'), pattern, enabled: true, defaultAction: 'new-tab', rules: [] });
     input.value = '';
     save();
     renderSites();
-  });
-
-  document.getElementById('rule-add').addEventListener('submit', (event) => {
-    event.preventDefault();
-    const input = document.getElementById('rule-pattern');
-    const pattern = input.value.trim();
-    if (!pattern) return;
-    config.linkRules.push({
-      id: uid('r'),
-      pattern,
-      action: document.getElementById('rule-action').value,
-      enabled: true,
-    });
-    input.value = '';
-    save();
-    renderRules();
-  });
-
-  const defaultAction = document.getElementById('default-action');
-  defaultAction.addEventListener('change', () => {
-    config.defaultAction = defaultAction.value;
-    save();
   });
 
   document.getElementById('test-page').addEventListener('input', updateTester);
@@ -217,7 +249,7 @@ function wireForms() {
 
   document.getElementById('reset').addEventListener('click', () => {
     if (!confirm('Replace all sites and rules with the built-in defaults? This cannot be undone.')) return;
-    config = normalize(JSON.parse(JSON.stringify(LNT_DEFAULT_CONFIG)));
+    config = normalize(lntClone(LNT_DEFAULT_CONFIG));
     save();
     renderAll();
   });
@@ -225,8 +257,6 @@ function wireForms() {
 
 function renderAll() {
   renderSites();
-  renderRules();
-  document.getElementById('default-action').value = config.defaultAction;
   updateTester();
 }
 

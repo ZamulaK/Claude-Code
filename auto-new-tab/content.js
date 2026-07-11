@@ -2,9 +2,9 @@
 //
 // A single delegated capture-phase click listener decides at click time
 // whether the clicked link should open in a new tab, based on the user's
-// rules in chrome.storage. Nothing runs until a link is clicked, and links
-// added dynamically are covered automatically. The site check happens per
-// click against location.href, so single-page-app URL changes are handled.
+// site cards in chrome.storage. Nothing runs until a link is clicked, and
+// links added dynamically are covered automatically. The site lookup happens
+// per click against location.href, so single-page-app URL changes are handled.
 
 (function () {
   'use strict';
@@ -22,7 +22,8 @@
   });
 
   document.addEventListener('click', (event) => {
-    if (!lntIsActiveOn(compiled, location.href)) return;
+    const site = lntSiteForPage(compiled, location.href);
+    if (!site) return;
 
     // composedPath() finds the anchor even through shadow DOM.
     const link = event.composedPath().find(
@@ -39,7 +40,7 @@
     if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
 
     // 'same-tab' means "leave the link alone", never force anything.
-    if (lntActionForLink(compiled, link.href) !== 'new-tab') return;
+    if (lntActionForLink(site, link.href) !== 'new-tab') return;
 
     link.target = '_blank';
     link.relList.add('noopener');

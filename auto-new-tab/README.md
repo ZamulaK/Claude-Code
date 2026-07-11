@@ -11,25 +11,30 @@ toggle isn't reachable there — see
 
 ## How it works
 
-Two lists, edited on the extension's settings page (changes apply immediately,
-no reload needed):
+Configuration is a list of **site cards**, edited on the extension's settings
+page (changes apply immediately, no reload needed). Each card says where the
+extension is active and what happens to links tapped there:
 
-- **Active sites** — URL patterns for the pages where the extension operates.
-  `*` is a wildcard: `https://example.com/account/*`.
-- **Link rules** — when you tap a link on an active site, the first matching
-  rule (top to bottom) decides **New tab** or **Same tab** ("same tab" means the
-  link is left alone). Links matching no rule use the configurable default
-  (out of the box: new tab).
+- **Site pattern** — where the card applies. Patterns use `*` as a wildcard:
+  `https://example.com/account/*`. The first enabled card matching the page
+  URL governs that page; pages matching no card are left entirely alone.
+- **Rules** — the card's first matching rule (top to bottom) decides whether a
+  tapped link opens in a **New Tab** or **Same Tab** ("same tab" means the link
+  is left alone, never forced).
+- **Other Links Open In** — the card's default for links matching no rule.
 
-The toolbar popup offers one-tap **"Open links in new tab on ⟨this site⟩"** so you
-rarely need to type patterns — especially handy on a phone. Settings live in
-`chrome.storage.sync`, so they ride Edge's sync between your devices, and a
-first install is pre-seeded with the original userscript's Marriott / Hilton /
-IHG / Google rules.
+Rules live inside their card, so a rule for one site can never leak onto
+another. The toolbar popup shows the current page's path with an on/off
+toggle — turning it off disables the matching card (reversibly), and turning
+it on for a new page creates a card scoped to that page's path. Settings live
+in `chrome.storage.sync`, so they ride Edge's sync between your devices; older
+stored configs migrate to the card format automatically, and a first install
+is pre-seeded with the original userscript's Marriott / Hilton / IHG / Google
+cards.
 
 Implementation: a single delegated capture-phase click listener sets
 `target="_blank"` (plus `rel="noopener"`) at click time. Nothing runs until a
-link is clicked, dynamically added links can't be missed, and the site check
+link is clicked, dynamically added links can't be missed, and the site lookup
 runs against the live URL so single-page-app navigation is handled.
 
 ## Install for local testing (desktop Edge)
