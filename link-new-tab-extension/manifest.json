@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Link New Tab | Auto",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Opens links in a new tab on sites you choose, with wildcard URL rules you manage yourself.",
   "permissions": ["storage", "activeTab"],
   "icons": {
@@ -19,7 +19,7 @@
   },
   "options_ui": {
     "page": "options.html",
-    "open_in_tab": true
+    "open_in_tab": false
   },
   "content_scripts": [
     {
