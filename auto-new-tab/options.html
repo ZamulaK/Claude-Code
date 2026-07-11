@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Link New Tab — Settings</title>
+  <title>Auto New Tab — Settings</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="options">
-  <h1>Link New Tab | Auto</h1>
+  <h1>Auto New Tab</h1>
   <p class="hint">
     Choose the sites where the extension is active. On those sites, tapped links
     open in a new tab unless a rule says otherwise. Changes save automatically.
@@ -65,11 +65,12 @@
   </section>
 
   <section>
-    <h2>Backup</h2>
+    <h2>Backup &amp; reset</h2>
     <div class="row">
       <button id="export" type="button">Export JSON</button>
       <button id="import-button" type="button">Import JSON</button>
       <input type="file" id="import-file" accept=".json,application/json" hidden>
+      <button id="reset" type="button" class="danger">Reset to defaults</button>
     </div>
   </section>
 

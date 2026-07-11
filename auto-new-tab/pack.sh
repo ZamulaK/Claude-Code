@@ -3,12 +3,12 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 mkdir -p dist
-rm -f dist/link-new-tab-extension.zip
-zip -r dist/link-new-tab-extension.zip \
+rm -f dist/auto-new-tab.zip
+zip -r dist/auto-new-tab.zip \
   manifest.json \
   common.js content.js \
   options.html options.js \
   popup.html popup.js \
   styles.css \
   icons
-echo "Built dist/link-new-tab-extension.zip"
+echo "Built dist/auto-new-tab.zip"

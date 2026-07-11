@@ -1,4 +1,4 @@
-// Link New Tab | Auto — content script
+// Auto New Tab — content script
 //
 // A single delegated capture-phase click listener decides at click time
 // whether the clicked link should open in a new tab, based on the user's

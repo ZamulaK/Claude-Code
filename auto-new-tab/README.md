@@ -1,4 +1,4 @@
-# Link New Tab | Auto — Edge extension
+# Auto New Tab — Edge extension
 
 A Microsoft Edge (Manifest V3) extension that opens links in a new tab on sites
 you choose, with wildcard URL rules you manage yourself — no code changes needed
@@ -44,7 +44,7 @@ you publish afterwards auto-updates — no re-sideloading after browser updates.
 
 1. Register (free) for the Microsoft Edge program on
    [Partner Center](https://partner.microsoft.com/dashboard/microsoftedge).
-2. Run `./pack.sh` and upload `dist/link-new-tab-extension.zip` as a new
+2. Run `./pack.sh` and upload `dist/auto-new-tab.zip` as a new
    extension. Set **Visibility: Hidden** so it never appears in store search —
    it stays reachable only by direct link/ID.
 3. After certification (up to 7 business days, usually much faster), copy the

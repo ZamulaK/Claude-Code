@@ -75,6 +75,7 @@ function renderSites() {
       enabledCheckbox(site),
       patternInput(site),
       iconButton('✕', 'Delete', () => {
+        if (!confirm(`Delete site pattern “${site.pattern}”?`)) return;
         config.sites = config.sites.filter((s) => s !== site);
         save();
         renderSites();
@@ -118,6 +119,7 @@ function renderRules() {
       up,
       down,
       iconButton('✕', 'Delete', () => {
+        if (!confirm(`Delete rule “${rule.pattern}”?`)) return;
         config.linkRules = config.linkRules.filter((r) => r !== rule);
         save();
         renderRules();
@@ -191,7 +193,7 @@ function wireForms() {
 
   document.getElementById('export').addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-    const a = el('a', { href: URL.createObjectURL(blob), download: 'link-new-tab-config.json' });
+    const a = el('a', { href: URL.createObjectURL(blob), download: 'auto-new-tab-config.json' });
     a.click();
     URL.revokeObjectURL(a.href);
   });
@@ -211,6 +213,13 @@ function wireForms() {
     } catch (e) {
       alert('Could not import: not a valid config file.');
     }
+  });
+
+  document.getElementById('reset').addEventListener('click', () => {
+    if (!confirm('Replace all sites and rules with the built-in defaults? This cannot be undone.')) return;
+    config = normalize(JSON.parse(JSON.stringify(LNT_DEFAULT_CONFIG)));
+    save();
+    renderAll();
   });
 }
 

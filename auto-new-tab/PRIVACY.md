@@ -1,4 +1,4 @@
-# Privacy statement — Link New Tab | Auto
+# Privacy statement — Auto New Tab
 
 This extension does not collect, transmit, or share any data.
 
