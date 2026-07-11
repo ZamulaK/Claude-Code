@@ -22,10 +22,20 @@ script as its own extension restores the behavior on Android.
 
 ## What changed from the userscript
 
-The logic is the same (same URL rules, Hilton activity links still stay in the same
-tab), but the `setTimeout` re-runs and click-handler hacks were replaced with a
-debounced `MutationObserver`, so links added by pagination, toggles, and other
-dynamic page updates are handled automatically.
+The URL rules are the same (Hilton activity links still stay in the same tab,
+confirmation-number links always get a new tab), but the implementation is
+different: instead of scanning every `<a>` on the page and re-scanning on timers
+and click handlers, a single delegated capture-phase click listener decides at
+click time whether the clicked link should get `target="_blank"`. That means:
+
+- **No missed links.** Content added by pagination, toggles, or in-page views is
+  covered automatically — the decision happens on the click, not on a pre-pass.
+- **No wasted work.** Nothing runs until you actually tap a link.
+- **Cleaner rules.** URL checks use parsed `URL` objects (hostname, pathname,
+  query params) instead of substring matching on the raw href, declared in two
+  small rule lists (`KEEP_SAME_TAB` / `OPEN_NEW_TAB`) that are easy to extend.
+- **`rel="noopener"`** is added alongside `target="_blank"` so the opened page
+  can't script the opener tab.
 
 ## Install on desktop Edge (for testing)
 

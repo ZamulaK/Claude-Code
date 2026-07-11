@@ -1,55 +1,50 @@
 // Link New Tab | Auto — content script
 //
-// Ported from the Tampermonkey userscript of the same name. Instead of the
-// userscript's setTimeout/click-handler re-runs, a MutationObserver reprocesses
-// links whenever the page adds or changes them (pagination, toggles, Hilton
-// activity views, etc.), so dynamically loaded content is always covered.
+// Instead of scanning and rewriting every <a> on the page (and re-scanning as
+// the page changes), a single delegated capture-phase click listener decides at
+// click time whether the link should open in a new tab. Links added by
+// pagination, toggles, or in-page views are covered automatically because the
+// decision happens on the click itself, not on a pre-pass over the DOM.
 
 (function () {
   'use strict';
 
-  var HILTON_ACTIVITY = 'https://www.hilton.com/en/hilton-honors/guest/activity/';
+  // Rules receive a parsed URL object. A link opens in a new tab when no
+  // KEEP_SAME_TAB rule matches and at least one OPEN_NEW_TAB rule does.
 
-  function processLink(a) {
-    var href = a.href || '';
-    if (!href) return;
+  const KEEP_SAME_TAB = [
+    // Hilton activity links load in-page detail views.
+    (url) => url.hostname === 'www.hilton.com'
+      && url.pathname.startsWith('/en/hilton-honors/guest/activity/'),
+  ];
 
-    // Hilton activity links stay in the same tab (they load in-page content
-    // that the observer will then pick up).
-    if (href.indexOf(HILTON_ACTIVITY) === 0) return;
+  const OPEN_NEW_TAB = [
+    // Reservation-confirmation links always get a new tab.
+    (url) => url.searchParams.has('confirmationNumber'),
+    // Anything that navigates away from the list/search pages themselves.
+    (url) => url.hostname !== 'www.marriott.com'
+      && !(url.hostname === 'www.google.com' && url.pathname === '/search'),
+  ];
 
-    if (
-      (href.indexOf('https://www.marriott.com/') === -1 &&
-        href.indexOf('https://www.google.com/search') === -1) ||
-      href.indexOf('confirmationNumber=') !== -1
-    ) {
-      a.setAttribute('target', '_blank');
+  function shouldOpenInNewTab(href) {
+    let url;
+    try {
+      url = new URL(href, location.href);
+    } catch {
+      return false;
     }
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return false;
+    if (KEEP_SAME_TAB.some((rule) => rule(url))) return false;
+    return OPEN_NEW_TAB.some((rule) => rule(url));
   }
 
-  function processAll() {
-    document.querySelectorAll('a[href]').forEach(processLink);
-  }
-
-  // Initial pass, plus late passes for slow single-page-app rendering.
-  processAll();
-  setTimeout(processAll, 2000);
-  setTimeout(processAll, 6000);
-
-  // Reprocess (debounced) whenever the DOM changes or an href is rewritten.
-  var scheduled = null;
-  var observer = new MutationObserver(function () {
-    if (scheduled) return;
-    scheduled = setTimeout(function () {
-      scheduled = null;
-      processAll();
-    }, 300);
-  });
-
-  observer.observe(document.documentElement, {
-    childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ['href']
-  });
+  document.addEventListener('click', (event) => {
+    // composedPath() finds the anchor even through shadow DOM.
+    const link = event.composedPath().find(
+      (node) => node instanceof HTMLAnchorElement && node.href,
+    );
+    if (!link || !shouldOpenInNewTab(link.href)) return;
+    link.target = '_blank';
+    link.relList.add('noopener');
+  }, true); // capture phase: runs before the page's own click handlers
 })();

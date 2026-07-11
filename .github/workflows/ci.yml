@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate manifest.json
+        run: python3 -m json.tool link-new-tab-extension/manifest.json > /dev/null
+
+      - name: Check content.js syntax
+        run: node --check link-new-tab-extension/content.js
+
+      - name: Build extension zip
+        run: ./link-new-tab-extension/pack.sh
+
+      - name: Upload extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: link-new-tab-extension
+          path: link-new-tab-extension/dist/link-new-tab-extension.zip
