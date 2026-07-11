@@ -9,8 +9,17 @@ async function init() {
   const addSite = document.getElementById('add-site');
   const addPage = document.getElementById('add-page');
 
-  document.getElementById('open-options').addEventListener('click', () => {
-    chrome.runtime.openOptionsPage();
+  // Open options.html as a plain tab instead of chrome.runtime.openOptionsPage():
+  // on Edge for Android the latter routes through the extension-details page,
+  // which is broken (blank) there, so the call silently does nothing.
+  document.getElementById('open-options').addEventListener('click', async () => {
+    const optionsUrl = chrome.runtime.getURL('options.html');
+    try {
+      await chrome.tabs.create({ url: optionsUrl });
+      window.close();
+    } catch (e) {
+      window.open(optionsUrl);
+    }
   });
 
   let url = null;
