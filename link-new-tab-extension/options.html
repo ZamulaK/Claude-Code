@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Link New Tab — Settings</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="options">
+  <h1>Link New Tab | Auto</h1>
+  <p class="hint">
+    Choose the sites where the extension is active. On those sites, tapped links
+    open in a new tab unless a rule says otherwise. Changes save automatically.
+  </p>
+
+  <section>
+    <h2>Active sites</h2>
+    <p class="hint">
+      Patterns match the page URL. <code>*</code> is a wildcard, e.g.
+      <code>https://example.com/account/*</code>.
+    </p>
+    <div id="site-list"></div>
+    <form id="site-add" class="row add">
+      <input type="text" id="site-pattern" class="pattern" placeholder="https://example.com/*"
+             autocomplete="off" spellcheck="false" required>
+      <button type="submit">Add</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Link rules</h2>
+    <p class="hint">
+      When you tap a link on an active site, the first matching rule (top to
+      bottom) decides. &ldquo;Same tab&rdquo; leaves the link alone. Links matching no
+      rule use the default action.
+    </p>
+    <div id="rule-list"></div>
+    <form id="rule-add" class="row add">
+      <input type="text" id="rule-pattern" class="pattern" placeholder="*confirmationNumber=*"
+             autocomplete="off" spellcheck="false" required>
+      <select id="rule-action">
+        <option value="new-tab">New tab</option>
+        <option value="same-tab">Same tab</option>
+      </select>
+      <button type="submit">Add</button>
+    </form>
+    <div class="row spaced">
+      <label for="default-action">Default for unmatched links</label>
+      <select id="default-action">
+        <option value="new-tab">New tab</option>
+        <option value="same-tab">Same tab</option>
+      </select>
+    </div>
+  </section>
+
+  <section>
+    <h2>Try it</h2>
+    <div class="stack">
+      <input type="text" id="test-page" placeholder="Page URL, e.g. https://www.google.com/search?q=hotels"
+             autocomplete="off" spellcheck="false">
+      <input type="text" id="test-link" placeholder="Link URL, e.g. https://example.com/stay?confirmationNumber=123"
+             autocomplete="off" spellcheck="false">
+      <p id="test-result" class="hint"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Backup</h2>
+    <div class="row">
+      <button id="export" type="button">Export JSON</button>
+      <button id="import-button" type="button">Import JSON</button>
+      <input type="file" id="import-file" accept=".json,application/json" hidden>
+    </div>
+  </section>
+
+  <script src="common.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

@@ -1,82 +1,83 @@
 # Link New Tab | Auto — Edge extension
 
-A standalone Microsoft Edge (Manifest V3) extension port of the "Link New Tab | Auto"
-Tampermonkey userscript. It forces links to open in a new tab on:
+A Microsoft Edge (Manifest V3) extension that opens links in a new tab on sites
+you choose, with wildcard URL rules you manage yourself — no code changes needed
+to add or remove sites. Works on desktop Edge and Edge for Android.
 
-- `https://www.marriott.com/loyalty/findReservationList.mi*`
-- `https://www.hilton.com/en/hilton-honors/guest/*`
-- `https://www.ihg.com/rewardsclub/us/en/account-mgmt/staysevents*`
-- `https://www.google.com/search*`
+Originally a Tampermonkey userscript; rebuilt as an extension because userscript
+managers can no longer inject on Edge for Android (the required developer-mode
+toggle isn't reachable there — see
+[Tampermonkey issue #2241](https://github.com/Tampermonkey/tampermonkey/issues/2241)).
 
-## Why an extension instead of Tampermonkey?
+## How it works
 
-Since Tampermonkey 5.3.x, Chromium's Manifest V3 rules require the browser's
-**Developer mode** (or the "Allow User Scripts" toggle) to be enabled before any
-userscript can be injected. On desktop Edge you can flip that switch on
-`edge://extensions` — but Edge for Android cannot open `edge://extensions`, so
-Tampermonkey silently stops injecting scripts there
-([Tampermonkey issue #2241](https://github.com/Tampermonkey/tampermonkey/issues/2241)).
+Two lists, edited on the extension's settings page (changes apply immediately,
+no reload needed):
 
-A regular extension content script does **not** need that toggle, so packaging the
-script as its own extension restores the behavior on Android.
+- **Active sites** — URL patterns for the pages where the extension operates.
+  `*` is a wildcard: `https://example.com/account/*`.
+- **Link rules** — when you tap a link on an active site, the first matching
+  rule (top to bottom) decides **New tab** or **Same tab** ("same tab" means the
+  link is left alone). Links matching no rule use the configurable default
+  (out of the box: new tab).
 
-## What changed from the userscript
+The toolbar popup offers one-tap **"Open links in new tab on ⟨this site⟩"** so you
+rarely need to type patterns — especially handy on a phone. Settings live in
+`chrome.storage.sync`, so they ride Edge's sync between your devices, and a
+first install is pre-seeded with the original userscript's Marriott / Hilton /
+IHG / Google rules.
 
-The URL rules are the same (Hilton activity links still stay in the same tab,
-confirmation-number links always get a new tab), but the implementation is
-different: instead of scanning every `<a>` on the page and re-scanning on timers
-and click handlers, a single delegated capture-phase click listener decides at
-click time whether the clicked link should get `target="_blank"`. That means:
+Implementation: a single delegated capture-phase click listener sets
+`target="_blank"` (plus `rel="noopener"`) at click time. Nothing runs until a
+link is clicked, dynamically added links can't be missed, and the site check
+runs against the live URL so single-page-app navigation is handled.
 
-- **No missed links.** Content added by pagination, toggles, or in-page views is
-  covered automatically — the decision happens on the click, not on a pre-pass.
-- **No wasted work.** Nothing runs until you actually tap a link.
-- **Cleaner rules.** URL checks use parsed `URL` objects (hostname, pathname,
-  query params) instead of substring matching on the raw href, declared in two
-  small rule lists (`KEEP_SAME_TAB` / `OPEN_NEW_TAB`) that are easy to extend.
-- **`rel="noopener"`** is added alongside `target="_blank"` so the opened page
-  can't script the opener tab.
+## Install for local testing (desktop Edge)
 
-## Install on desktop Edge (for testing)
+`edge://extensions` → enable **Developer mode** → **Load unpacked** → select this
+folder.
 
-1. Open `edge://extensions`, enable **Developer mode**.
-2. Click **Load unpacked** and select this `link-new-tab-extension/` folder.
+## Recommended: publish to the Edge Add-ons store, install by ID on Android
 
-## Install on Edge for Android
+This is the low-maintenance path: install once on the phone, and every version
+you publish afterwards auto-updates — no re-sideloading after browser updates.
 
-Extension sideloading currently requires **Edge Canary** for Android
-(from Google Play). Stable Edge only installs extensions curated in the mobile
-Add-ons store.
+1. Register (free) for the Microsoft Edge program on
+   [Partner Center](https://partner.microsoft.com/dashboard/microsoftedge).
+2. Run `./pack.sh` and upload `dist/link-new-tab-extension.zip` as a new
+   extension. Set **Visibility: Hidden** so it never appears in store search —
+   it stays reachable only by direct link/ID.
+3. After certification (up to 7 business days, usually much faster), copy the
+   extension ID from the end of the store listing URL.
+4. On the phone (Edge Dev or Canary): Settings → **About Microsoft Edge** → tap
+   the version number 5 times → **Developer options** → **Extension install by
+   ID** → paste the ID.
+5. Future updates: bump `version` in `manifest.json`, `./pack.sh`, upload to
+   Partner Center. Installed copies update automatically.
 
-1. **Pack the extension into a `.crx` on your desktop:**
-   - Open desktop Edge → `edge://extensions` → enable **Developer mode**.
-   - Click **Pack extension**, choose this `link-new-tab-extension/` folder,
-     leave the key field empty, and click **Pack extension**.
-   - This produces `link-new-tab-extension.crx` (and a `.pem` key — keep the `.pem`
-     if you want future updates to keep the same extension identity).
-2. **Copy the `.crx` to your phone** (Drive, email, USB, etc.).
-3. **Unlock developer options in Edge Canary on Android:**
-   - Menu (☰) → **Settings** → **About Microsoft Edge** → tap the build/version
-     number **5 times**.
-4. **Sideload it:**
-   - Settings → **Developer options** → **Extension install by crx** → pick the
-     `.crx` file you copied over.
-5. Open one of the matched sites and verify links open in new tabs.
+## Alternative: sideload a .crx (Edge Canary only)
 
-> Note: Edge Canary updates frequently and developer options occasionally move.
-> If "Extension install by crx" is missing, update Canary and re-check
-> Settings → Developer options.
+For quick device testing without the store: desktop Edge → `edge://extensions` →
+**Pack extension** on this folder (keep the generated `.pem`), copy the `.crx` to
+the phone, then Edge Canary → Developer options → **Extension install by crx**.
+Note you must re-sideload after code changes yourself.
 
-### Alternative: publish to the Edge Add-ons store
+## Development
 
-If you'd rather not re-sideload after Canary updates, you can publish the extension
-(privately/unlisted) to the [Edge Add-ons developer dashboard](https://partner.microsoft.com/dashboard/microsoftedge),
-then use **Developer options → Extension install by ID** on Android with the ID from
-the store listing URL. `pack.sh` builds the store-upload zip.
+- `npm` not required; plain HTML/JS/CSS.
+- `node test/run-tests.js` — unit tests for the pattern/rule engine.
+- `pack.sh` — builds the store-upload zip into `dist/`.
+- CI syntax-checks the JS, runs the tests, and uploads the built zip as an
+  artifact on every push.
 
 ## Files
 
-- `manifest.json` — MV3 manifest with the same match patterns as the userscript
-- `content.js` — the ported script
-- `icons/` — extension icons
-- `pack.sh` — builds `dist/link-new-tab-extension.zip` for store upload
+- `manifest.json` — MV3 manifest (`storage` + `activeTab` permissions, content
+  script on `http`/`https`)
+- `common.js` — config model, wildcard matching, storage helpers (shared)
+- `content.js` — the delegated click listener
+- `options.html` / `options.js` — settings UI (sites, rules, tester, backup)
+- `popup.html` / `popup.js` — one-tap "add this site" toolbar popup
+- `styles.css` — shared styles, mobile-first with dark-mode support
+- `test/run-tests.js` — unit tests
+- `pack.sh` — zip builder

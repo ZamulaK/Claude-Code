@@ -1,0 +1,109 @@
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1a1a2e;
+  --muted: #5f6368;
+  --border: #d0d4dc;
+  --accent: #0b57d0;
+  --accent-fg: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1f2023;
+    --fg: #e8eaed;
+    --muted: #9aa0a6;
+    --border: #45474b;
+    --accent: #7cacf8;
+    --accent-fg: #062e6f;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0 auto;
+  padding: 16px;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+body.options { max-width: 640px; }
+
+body.popup {
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+h1 { font-size: 1.3em; margin: 0 0 4px; }
+h2 { font-size: 1.05em; margin: 0 0 4px; }
+
+section { margin: 24px 0; }
+
+.hint { color: var(--muted); font-size: 0.9em; margin: 4px 0 10px; }
+
+code {
+  background: color-mix(in srgb, var(--border) 40%, transparent);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.row.spaced { justify-content: space-between; margin-top: 14px; }
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+input[type="text"], select {
+  font: inherit;
+  color: inherit;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+input.pattern { flex: 1; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.85em; }
+
+input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+
+button {
+  font: inherit;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 14px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  cursor: pointer;
+}
+
+button:disabled { opacity: 0.4; cursor: default; }
+
+button.icon {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 6px 9px;
+  flex: none;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--border);
+}
+
+.status { margin: 2px 0; font-weight: 600; }

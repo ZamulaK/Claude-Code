@@ -13,8 +13,14 @@ jobs:
       - name: Validate manifest.json
         run: python3 -m json.tool link-new-tab-extension/manifest.json > /dev/null
 
-      - name: Check content.js syntax
-        run: node --check link-new-tab-extension/content.js
+      - name: Check JavaScript syntax
+        run: |
+          for f in link-new-tab-extension/*.js link-new-tab-extension/test/*.js; do
+            node --check "$f"
+          done
+
+      - name: Run unit tests
+        run: node link-new-tab-extension/test/run-tests.js
 
       - name: Build extension zip
         run: ./link-new-tab-extension/pack.sh
