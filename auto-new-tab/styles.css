@@ -22,25 +22,40 @@
 * { box-sizing: border-box; }
 
 body {
-  margin: 0 auto;
-  padding: 16px;
-  /* Explicit horizontal gutter: some mobile browsers (e.g. Quetta) render
-     extension pages flush to the screen edge, into the safe-area insets. */
-  padding-left: max(20px, env(safe-area-inset-left, 0px));
-  padding-right: max(20px, env(safe-area-inset-right, 0px));
+  margin: 0;
+  padding: 0;
   background: var(--bg);
   color: var(--fg);
   font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-body.options { max-width: 640px; }
+/* All layout lives on an inner wrapper: mobile browsers (Edge, Quetta)
+   inject their own styles onto the popup/options <body> to fit their
+   sheets, overriding body-level width, margin, and padding. */
+.wrap {
+  padding: 16px;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
 
-body.popup {
-  width: 280px;
-  max-width: 100%;
+body.options .wrap {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+body.popup { width: 280px; max-width: 100%; }
+
+body.popup .wrap {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+/* Browsers that render the popup as a full-width sheet (Edge and Quetta on
+   Android) give it a wide viewport; use that space instead of a centered
+   280px column. Desktop popups size to the 280px body and never match. */
+@media (min-width: 400px) {
+  body.popup { width: 100%; }
 }
 
 h1 { font-size: 1.3em; margin: 0 0 4px; }
@@ -184,7 +199,9 @@ button.danger {
   padding: 0;
   font-size: 0.8em;
   color: var(--muted);
-  word-break: break-all;
+  /* Prefer breaking at the <wbr> path boundaries; break anywhere only as
+     a last resort for very long path segments. */
+  overflow-wrap: anywhere;
 }
 
 .version {

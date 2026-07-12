@@ -50,7 +50,15 @@ async function init() {
     toggle.checked = active;
   };
 
-  pathLabel.textContent = url.host + url.pathname;
+  // Insert soft break opportunities after each path segment so long URLs
+  // wrap at '/' boundaries instead of mid-word.
+  const segments = (url.host + url.pathname).split('/');
+  segments.forEach((segment, index) => {
+    pathLabel.append(segment + (index < segments.length - 1 ? '/' : ''));
+    if (index < segments.length - 1) {
+      pathLabel.append(document.createElement('wbr'));
+    }
+  });
   row.hidden = false;
 
   // The toggle disables matching site cards rather than deleting them, so
