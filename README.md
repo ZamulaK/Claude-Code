@@ -22,3 +22,7 @@ Started as a Tampermonkey userscript for hotel-loyalty and search sites.
   `auto-new-tab/dist/`.
 - CI validates `manifest.json` and `content.js` and uploads the built zip as a
   workflow artifact on every push.
+
+## License
+
+Everything in this repository is released under the [MIT License](LICENSE).

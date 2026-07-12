@@ -85,3 +85,7 @@ Auto New Tab began as a Tampermonkey userscript. It was rebuilt as a proper
 extension because userscript managers can no longer inject on Edge for
 Android — the Manifest V3 rules require a developer-mode toggle that mobile
 Edge can't reach ([Tampermonkey issue #2241](https://github.com/Tampermonkey/tampermonkey/issues/2241)).
+
+## License
+
+[MIT](../LICENSE) — free to use, modify, and share.
