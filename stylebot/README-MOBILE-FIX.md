@@ -22,14 +22,21 @@ works everywhere:
 
 Manifest changes:
 
-- `name` → "Stylebot Mobile" and `version` → 3.1.3, to distinguish it
+- `name` → "Stylebot Mobile" and `version` → 3.1.4, to distinguish it
   from the store copy.
 - Removed `key`, so this copy gets its own extension ID and can be installed
   alongside (or instead of) the store version without colliding with it.
 - Removed `update_url`, so the store can never auto-update over the patch.
 - Removed the store's `_metadata` signature folder (invalid after any edit).
 
-Nothing else is modified.
+Options page mobile layout (v3.1.4): Stylebot's stock CSS sets
+`min-width: 880px` on the page container and uses a fixed sidebar column,
+so on a phone the content pane was clipped. `options/mobile.css` +
+`options/mobile.js` (new files, loaded from `options/index.html` along with
+a viewport meta tag) make the page responsive below 700px: the container
+shrinks to the screen, and the sidebar becomes a slide-in drawer behind a
+hamburger button (tap outside or pick a section to close it). Wide screens
+keep the stock layout. Stylebot's own code is otherwise unmodified.
 
 ## Install on Edge for Android
 
