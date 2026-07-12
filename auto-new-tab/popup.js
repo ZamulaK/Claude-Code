@@ -5,6 +5,20 @@ function popupUid(prefix) {
 }
 
 async function init() {
+  // Opened as a full tab (e.g. via the browser's open-in-tab control on the
+  // popup sheet)? getCurrent() returns a tab there — but so may sheet-style
+  // popups on some mobile browsers, so only treat this as a full tab when we
+  // are also the ACTIVE tab (in a sheet, the active tab is the real page).
+  // There's nothing to configure in a full tab — show the settings instead.
+  const ownTab = await chrome.tabs.getCurrent();
+  if (ownTab) {
+    const [active] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (active && active.id === ownTab.id) {
+      location.replace('options.html');
+      return;
+    }
+  }
+
   document.getElementById('version').textContent =
     'v' + chrome.runtime.getManifest().version;
   const status = document.getElementById('status');

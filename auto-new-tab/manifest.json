@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Auto New Tab",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "Opens links in a new tab on sites you choose, with wildcard URL rules you manage yourself.",
   "permissions": ["storage", "activeTab"],
   "icons": {
