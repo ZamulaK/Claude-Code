@@ -12,10 +12,16 @@ const lntClone = (value) => JSON.parse(JSON.stringify(value));
 // page URL governs that page; within it, the first matching rule decides a
 // tapped link, falling back to the site's defaultAction.
 //
-// Seeded on first run; reproduces the behavior of the original userscript.
+// Fresh installs start empty: the extension does nothing until the user
+// enables a site via the popup toggle or the settings page.
 const LNT_DEFAULT_CONFIG = {
   version: 2,
-  sites: [
+  sites: [],
+};
+
+// The author's ruleset (from the original userscript), offered on the
+// settings page as a one-tap sample the user can choose to apply.
+const LNT_SAMPLE_SITES = [
     {
       id: 's-marriott',
       pattern: 'https://www.marriott.com/loyalty/findReservationList.mi*',
@@ -51,8 +57,7 @@ const LNT_DEFAULT_CONFIG = {
         { id: 'r-google-search', pattern: 'https://www.google.com/search*', action: 'same-tab', enabled: true },
       ],
     },
-  ],
-};
+];
 
 // Userscript-style wildcard: '*' matches anything, everything else is literal.
 // The pattern must match the whole URL, so use a trailing '*' for prefixes.
@@ -76,7 +81,7 @@ function lntMigrateConfig(config) {
   const defaultAction = config.defaultAction === 'same-tab' ? 'same-tab' : 'new-tab';
   const globalRules = (Array.isArray(config.linkRules) ? config.linkRules : [])
     .filter((rule) => rule && typeof rule.pattern === 'string');
-  const seeded = new Map(LNT_DEFAULT_CONFIG.sites.map((site) => [site.id, site]));
+  const seeded = new Map(LNT_SAMPLE_SITES.map((site) => [site.id, site]));
   const ruleEnabled = new Map(globalRules.map((rule) => [rule.id, rule.enabled !== false]));
 
   return {

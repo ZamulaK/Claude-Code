@@ -173,11 +173,29 @@ function renderSiteCard(site, index) {
   return card;
 }
 
+function loadSamples() {
+  const existing = new Set(config.sites.map((site) => site.pattern));
+  for (const sample of LNT_SAMPLE_SITES) {
+    if (!existing.has(sample.pattern)) config.sites.push(lntClone(sample));
+  }
+  save();
+  renderSites();
+}
+
 function renderSites() {
   const list = document.getElementById('site-list');
   list.textContent = '';
   if (!config.sites.length) {
-    list.append(el('p', { className: 'hint', textContent: 'No sites yet — the extension is inactive everywhere.' }));
+    const sampleButton = el('button', { type: 'button', textContent: 'Load Sample Rules' });
+    sampleButton.addEventListener('click', loadSamples);
+    list.append(
+      el('p', {
+        className: 'hint',
+        textContent: 'No sites yet — the extension is inactive everywhere. '
+          + 'Flip the toggle in the popup on any page, add a site below, or start from the sample ruleset:',
+      }),
+      el('div', { className: 'row' }, sampleButton),
+    );
   }
   config.sites.forEach((site, index) => list.append(renderSiteCard(site, index)));
 }
@@ -247,8 +265,10 @@ function wireForms() {
     }
   });
 
+  document.getElementById('load-samples').addEventListener('click', loadSamples);
+
   document.getElementById('reset').addEventListener('click', () => {
-    if (!confirm('Replace all sites and rules with the built-in defaults? This cannot be undone.')) return;
+    if (!confirm('Remove all sites and rules? This cannot be undone.')) return;
     config = normalize(lntClone(LNT_DEFAULT_CONFIG));
     save();
     renderAll();

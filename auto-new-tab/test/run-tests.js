@@ -9,11 +9,12 @@ const vm = require('vm');
 const src = fs.readFileSync(path.join(__dirname, '..', 'common.js'), 'utf8');
 const context = vm.createContext({ console });
 const api = vm.runInContext(
-  src + '\n;({ LNT_DEFAULT_CONFIG, lntCompilePattern, lntCompileConfig, lntMigrateConfig, lntSiteForPage, lntIsActiveOn, lntRuleForLink, lntActionForLink })',
+  src + '\n;({ LNT_DEFAULT_CONFIG, LNT_SAMPLE_SITES, lntCompilePattern, lntCompileConfig, lntMigrateConfig, lntSiteForPage, lntIsActiveOn, lntRuleForLink, lntActionForLink })',
   context,
 );
 
-const compiled = api.lntCompileConfig(api.LNT_DEFAULT_CONFIG);
+// The sample ruleset applied — the behavior of the original userscript.
+const compiled = api.lntCompileConfig({ version: 2, sites: api.LNT_SAMPLE_SITES });
 const active = (url) => api.lntIsActiveOn(compiled, url);
 // Action for a link clicked while on a given page (null if page is inactive).
 const action = (pageUrl, linkUrl) => {
@@ -53,9 +54,18 @@ check('regex special characters are literal', () => {
   assert(!re.test('https://a.com/pXq=123'));
 });
 
-// --- default config: site activation (the userscript's @match lines) ---
+// --- defaults and samples ---
 
-check('active on the four original pages', () => {
+check('fresh default config is inactive everywhere', () => {
+  const fresh = api.lntCompileConfig(api.LNT_DEFAULT_CONFIG);
+  assert.equal(fresh.sites.length, 0);
+  assert(!api.lntIsActiveOn(fresh, MARRIOTT_PAGE));
+  assert(!api.lntIsActiveOn(fresh, GOOGLE_PAGE));
+});
+
+// --- sample ruleset: site activation (the userscript's @match lines) ---
+
+check('sample ruleset active on the four original pages', () => {
   assert(active(MARRIOTT_PAGE));
   assert(active(HILTON_PAGE));
   assert(active('https://www.ihg.com/rewardsclub/us/en/account-mgmt/staysevents'));
@@ -68,7 +78,7 @@ check('inactive elsewhere', () => {
   assert(!active('https://example.com/'));
 });
 
-// --- default config: per-site link actions (the userscript's if/else logic) ---
+// --- sample ruleset: per-site link actions (the userscript's if/else logic) ---
 
 check('external links open in a new tab', () => {
   assert.equal(action(MARRIOTT_PAGE, 'https://example.com/deal'), 'new-tab');
@@ -191,11 +201,11 @@ check('v1 user-added sites carry over the old global rules', () => {
   assert.deepEqual(custom.rules.map((r) => r.id), ['r-1']);
 });
 
-check('v2 configs pass through migration untouched; garbage becomes defaults', () => {
+check('v2 configs pass through migration untouched; garbage becomes the empty default', () => {
   const v2 = { version: 2, sites: [{ id: 'x', pattern: 'https://a.com/*', enabled: true, defaultAction: 'new-tab', rules: [] }] };
   assert.strictEqual(api.lntMigrateConfig(v2), v2);
-  assert.equal(api.lntMigrateConfig(null).sites.length, 4);
-  assert.equal(api.lntMigrateConfig({ hello: 1 }).sites.length, 4);
+  assert.equal(api.lntMigrateConfig(null).sites.length, 0);
+  assert.equal(api.lntMigrateConfig({ hello: 1 }).sites.length, 0);
 });
 
 console.log(`\n${passed} tests passed`);

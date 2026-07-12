@@ -32,7 +32,10 @@ holding its own rules:
 Changes save automatically and apply immediately — no reload needed. The
 **Try It** section lets you paste a page URL and a link URL to see exactly
 which rule would fire. **Backup & Reset** exports/imports your settings as
-JSON and can restore the built-in defaults.
+JSON, **Load Sample Rules** adds the author's ruleset (hotel-loyalty pages
+and Google search) as a starting point, and **Remove All Rules** starts over.
+A fresh install begins with no rules at all — the extension does nothing
+until you enable it somewhere.
 
 Settings are stored in your browser's extension sync storage, so signed-in
 browsers carry them between your devices. The extension collects no data and
