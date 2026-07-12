@@ -262,6 +262,8 @@ function renderAll() {
 
 async function init() {
   config = normalize(await lntLoadConfig());
+  document.getElementById('version').textContent =
+    'Auto New Tab v' + chrome.runtime.getManifest().version;
   wireForms();
   renderAll();
 }

@@ -5,6 +5,8 @@ function popupUid(prefix) {
 }
 
 async function init() {
+  document.getElementById('version').textContent =
+    'v' + chrome.runtime.getManifest().version;
   const status = document.getElementById('status');
   const row = document.getElementById('site-row');
   const pathLabel = document.getElementById('site-path');
