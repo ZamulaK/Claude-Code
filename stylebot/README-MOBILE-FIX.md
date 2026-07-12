@@ -1,4 +1,4 @@
-# Stylebot Auto
+# Stylebot Mobile
 
 A minimally patched copy of [Stylebot](https://github.com/ankit/stylebot) 3.1
 (by Ankit Ahuja, open source) that makes the options page reachable on
@@ -22,7 +22,7 @@ works everywhere:
 
 Manifest changes:
 
-- `name` → "Stylebot Auto" and `version` → 3.1.2, to distinguish it
+- `name` → "Stylebot Mobile" and `version` → 3.1.3, to distinguish it
   from the store copy.
 - Removed `key`, so this copy gets its own extension ID and can be installed
   alongside (or instead of) the store version without colliding with it.
