@@ -1,88 +1,84 @@
-# Auto New Tab — Edge extension
+# Auto New Tab
 
-A Microsoft Edge (Manifest V3) extension that opens links in a new tab on sites
-you choose, with wildcard URL rules you manage yourself — no code changes needed
-to add or remove sites. Works on desktop Edge and Edge for Android.
+A Microsoft Edge extension that opens links in a new tab on sites you choose.
+Pick the sites and pages where it's active; on those pages, tapped links open
+in a new tab unless one of your rules says otherwise. Works on desktop Edge
+and Edge for Android, and on other Chromium-based browsers.
 
-Originally a Tampermonkey userscript; rebuilt as an extension because userscript
-managers can no longer inject on Edge for Android (the required developer-mode
-toggle isn't reachable there — see
-[Tampermonkey issue #2241](https://github.com/Tampermonkey/tampermonkey/issues/2241)).
+**Install:** Microsoft Edge Add-ons — *store link coming once the listing is
+certified.*
 
-## How it works
+## Using the extension
 
-Configuration is a list of **site cards**, edited on the extension's settings
-page (changes apply immediately, no reload needed). Each card says where the
-extension is active and what happens to links tapped there:
+**The quickest way:** browse to a page where you want links to pop into new
+tabs, tap the Auto New Tab icon, and flip the toggle on. That's it — the
+extension creates a rule scoped to pages like that one. Flip the toggle off
+anytime to disable it there (nothing is deleted; flipping it back restores
+exactly what you had).
 
-- **Site pattern** — where the card applies. Patterns use `*` as a wildcard:
-  `https://example.com/account/*`. The first enabled card matching the page
-  URL governs that page; pages matching no card are left entirely alone.
-- **Rules** — the card's first matching rule (top to bottom) decides whether a
-  tapped link opens in a **New Tab** or **Same Tab** ("same tab" means the link
-  is left alone, never forced).
+**Fine-tuning:** open **All Settings** from the popup. Configuration is a list
+of **site cards** — each card is a place where the extension is active,
+holding its own rules:
+
+- **Site pattern** (card header) — where the card applies. `*` is a wildcard,
+  so `https://example.com/account/*` covers that whole section. The first
+  enabled card matching the page URL governs the page; pages matching no card
+  are left entirely alone.
+- **Rules** — when you tap a link on that site, the card's first matching rule
+  (top to bottom) decides **New Tab** or **Same Tab**. "Same Tab" means the
+  link is left untouched — the extension never forces anything.
 - **Other Links Open In** — the card's default for links matching no rule.
 
-Rules live inside their card, so a rule for one site can never leak onto
-another. The toolbar popup shows the current page's path with an on/off
-toggle — turning it off disables the matching card (reversibly), and turning
-it on for a new page creates a card scoped to that page's path. Settings live
-in `chrome.storage.sync`, so they ride Edge's sync between your devices; older
-stored configs migrate to the card format automatically, and a first install
-is pre-seeded with the original userscript's Marriott / Hilton / IHG / Google
-cards.
+Changes save automatically and apply immediately — no reload needed. The
+**Try It** section lets you paste a page URL and a link URL to see exactly
+which rule would fire. **Backup & Reset** exports/imports your settings as
+JSON and can restore the built-in defaults.
 
-Implementation: a single delegated capture-phase click listener sets
-`target="_blank"` (plus `rel="noopener"`) at click time. Nothing runs until a
-link is clicked, dynamically added links can't be missed, and the site lookup
-runs against the live URL so single-page-app navigation is handled.
+Settings are stored in your browser's extension sync storage, so signed-in
+browsers carry them between your devices. The extension collects no data and
+makes no network requests — see [PRIVACY.md](PRIVACY.md).
 
-## Install for local testing (desktop Edge)
+## Tips & known quirks
 
-`edge://extensions` → enable **Developer mode** → **Load unpacked** → select this
-folder.
+- The version you're running is shown at the bottom of the popup and the
+  settings page.
+- On some Android browsers the popup opens as a bottom sheet with an
+  "open in tab" control in its corner — that lands on the settings page.
+- Links that a site's own JavaScript intercepts (single-page-app routers)
+  can't be forced into a new tab; this is a browser limitation.
+- A link must match the *whole* pattern: use `*confirmationNumber=*` to match
+  text anywhere in a URL, and a trailing `*` for prefixes.
 
-## Recommended: publish to the Edge Add-ons store, install by ID on Android
+## Support
 
-This is the low-maintenance path: install once on the phone, and every version
-you publish afterwards auto-updates — no re-sideloading after browser updates.
+Questions, bugs, or ideas: please
+[open an issue](https://github.com/ZamulaK/Claude-Code/issues) — include the
+version number from the bottom of the settings page, your browser, and (for
+rule questions) the page URL and link URL involved. No guarantees, but issues
+are read.
 
-1. Register (free) for the Microsoft Edge program on
-   [Partner Center](https://partner.microsoft.com/dashboard/microsoftedge).
-2. Run `./pack.sh` and upload `dist/auto-new-tab.zip` as a new
-   extension. Set **Visibility: Hidden** so it never appears in store search —
-   it stays reachable only by direct link/ID.
-3. After certification (up to 7 business days, usually much faster), copy the
-   extension ID from the end of the store listing URL.
-4. On the phone (Edge Dev or Canary): Settings → **About Microsoft Edge** → tap
-   the version number 5 times → **Developer options** → **Extension install by
-   ID** → paste the ID.
-5. Future updates: bump `version` in `manifest.json`, `./pack.sh`, upload to
-   Partner Center. Installed copies update automatically.
+## For developers
 
-## Alternative: sideload a .crx (Edge Canary only)
+Plain HTML/JS/CSS, Manifest V3, no build step:
 
-For quick device testing without the store: desktop Edge → `edge://extensions` →
-**Pack extension** on this folder (keep the generated `.pem`), copy the `.crx` to
-the phone, then Edge Canary → Developer options → **Extension install by crx**.
-Note you must re-sideload after code changes yourself.
-
-## Development
-
-- `npm` not required; plain HTML/JS/CSS.
-- `node test/run-tests.js` — unit tests for the pattern/rule engine.
-- `pack.sh` — builds the store-upload zip into `dist/`.
-- CI syntax-checks the JS, runs the tests, and uploads the built zip as an
-  artifact on every push.
-
-## Files
-
-- `manifest.json` — MV3 manifest (`storage` + `activeTab` permissions, content
-  script on `http`/`https`)
+- `manifest.json` — MV3 manifest (`storage` + `activeTab` permissions)
 - `common.js` — config model, wildcard matching, storage helpers (shared)
-- `content.js` — the delegated click listener
-- `options.html` / `options.js` — settings UI (sites, rules, tester, backup)
-- `popup.html` / `popup.js` — one-tap "add this site" toolbar popup
-- `styles.css` — shared styles, mobile-first with dark-mode support
-- `test/run-tests.js` — unit tests
-- `pack.sh` — zip builder
+- `content.js` — a single delegated capture-phase click listener that decides
+  at click time whether the clicked link gets `target="_blank"` +
+  `rel="noopener"`; nothing runs until a link is clicked
+- `options.html` / `options.js` — settings UI · `popup.html` / `popup.js` —
+  toolbar popup · `styles.css` — shared styles (layout lives on an inner
+  wrapper because some mobile browsers override popup `body` styles)
+- `test/run-tests.js` — unit tests for the rule engine (`node test/run-tests.js`)
+- `pack.sh` — builds the store-upload zip into `dist/`
+
+Local testing: `edge://extensions` → Developer mode → **Load unpacked** →
+select this folder. CI syntax-checks the code, runs the tests, and uploads
+the built zip as an artifact on every push.
+
+## History
+
+Auto New Tab began as a Tampermonkey userscript. It was rebuilt as a proper
+extension because userscript managers can no longer inject on Edge for
+Android — the Manifest V3 rules require a developer-mode toggle that mobile
+Edge can't reach ([Tampermonkey issue #2241](https://github.com/Tampermonkey/tampermonkey/issues/2241)).
