@@ -1,0 +1,73 @@
+{
+   "author": "Ankit Ahuja",
+   "background": {
+      "scripts": [
+         "background/index.js"
+      ]
+   },
+   "browser_action": {
+      "default_icon": {
+         "16": "img/icon16.png",
+         "24": "img/icon24.png",
+         "32": "img/icon32.png"
+      },
+      "default_popup": "popup/index.html",
+      "default_title": "Stylebot"
+   },
+   "content_scripts": [
+      {
+         "exclude_matches": [
+            "*://*/*.xml"
+         ],
+         "js": [
+            "editor/index.js"
+         ],
+         "matches": [
+            "<all_urls>"
+         ],
+         "run_at": "document_idle"
+      },
+      {
+         "all_frames": true,
+         "exclude_matches": [
+            "*://*/*.xml"
+         ],
+         "js": [
+            "inject-css/index.js"
+         ],
+         "matches": [
+            "<all_urls>"
+         ],
+         "run_at": "document_start"
+      }
+   ],
+   "default_locale": "en",
+   "description": "__MSG_extension_description__",
+   "icons": {
+      "128": "img/icon128.png",
+      "16": "img/icon16.png",
+      "48": "img/icon48.png"
+   },
+   "manifest_version": 2,
+   "name": "Stylebot (Mobile Fix)",
+   "options_ui": {
+      "open_in_tab": true,
+      "page": "options/index.html"
+   },
+   "permissions": [
+      "tabs",
+      "storage",
+      "identity",
+      "contextMenus",
+      "unlimitedStorage",
+      "https://drive.google.com/*",
+      "https://www.googleapis.com/*",
+      "https://fonts.googleapis.com/*"
+   ],
+   "version": "3.1.1",
+   "web_accessible_resources": [
+      "editor/index.css",
+      "readability/index.css",
+      "monaco-editor/*"
+   ]
+}
