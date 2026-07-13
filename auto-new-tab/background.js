@@ -7,7 +7,8 @@
 
 'use strict';
 
-chrome.action.setBadgeBackgroundColor({ color: '#0b57d0' });
+// Green so the badge stands out against the blue icon.
+chrome.action.setBadgeBackgroundColor({ color: '#1e8e3e' });
 if (chrome.action.setBadgeTextColor) {
   chrome.action.setBadgeTextColor({ color: '#ffffff' });
 }
