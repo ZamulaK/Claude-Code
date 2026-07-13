@@ -5,8 +5,7 @@ Pick the sites and pages where it's active; on those pages, tapped links open
 in a new tab unless one of your rules says otherwise. Works on desktop Edge
 and Edge for Android, and on other Chromium-based browsers.
 
-**Install:** Microsoft Edge Add-ons — *store link coming once the listing is
-certified.*
+**Install:** [Auto New Tab on Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/auto-new-tab/dkkcfhpigoihlmnmmhdahjiehhbbpeed)
 
 ## Using the extension
 

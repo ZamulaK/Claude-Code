@@ -12,7 +12,8 @@ Started as a Tampermonkey userscript for hotel-loyalty and search sites.
   as a standalone extension because Tampermonkey userscripts can no longer
   inject on Edge for Android (the required developer-mode toggle isn't reachable
   there). See its [README](auto-new-tab/README.md) for install and
-  Edge Add-ons store publishing instructions.
+  Edge Add-ons store publishing instructions, or install it directly from
+  [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/auto-new-tab/dkkcfhpigoihlmnmmhdahjiehhbbpeed).
 
 ## Development
 
