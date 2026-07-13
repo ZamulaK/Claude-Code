@@ -85,11 +85,9 @@ check('external links open in a new tab', () => {
   assert.equal(action(HILTON_PAGE, 'https://www.hilton.com/en/book/reservation/'), 'new-tab');
 });
 
-check('marriott internal links stay put on the marriott page', () => {
-  assert.equal(action(MARRIOTT_PAGE, 'https://www.marriott.com/reservation/lookup.mi'), 'same-tab');
-});
-
-check('confirmationNumber links open in a new tab even for marriott', () => {
+check('links back to the reservation list stay put; other marriott links pop', () => {
+  assert.equal(action(MARRIOTT_PAGE, 'https://www.marriott.com/loyalty/findReservationList.mi?page=2'), 'same-tab');
+  assert.equal(action(MARRIOTT_PAGE, 'https://www.marriott.com/reservation/lookup.mi'), 'new-tab');
   assert.equal(action(MARRIOTT_PAGE, 'https://www.marriott.com/reservation/review.mi?confirmationNumber=123'), 'new-tab');
 });
 
@@ -183,8 +181,8 @@ check('v1 seeded config migrates to per-site cards with curated rules', () => {
   const migrated = api.lntMigrateConfig(v1);
   assert.equal(migrated.version, 2);
   const marriott = migrated.sites.find((s) => s.id === 's-marriott');
-  assert.deepEqual(marriott.rules.map((r) => r.id), ['r-confirmation', 'r-marriott']);
-  assert.equal(marriott.rules[0].enabled, false); // user's disable preserved
+  assert.deepEqual(marriott.rules.map((r) => r.id), ['r-marriott-list']);
+  assert.equal(marriott.rules[0].enabled, true);
   assert.equal(migrated.sites.find((s) => s.id === 's-google').enabled, false);
 });
 

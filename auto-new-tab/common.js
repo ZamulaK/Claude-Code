@@ -28,8 +28,7 @@ const LNT_SAMPLE_SITES = [
       enabled: true,
       defaultAction: 'new-tab',
       rules: [
-        { id: 'r-confirmation', pattern: '*confirmationNumber=*', action: 'new-tab', enabled: true },
-        { id: 'r-marriott', pattern: 'https://www.marriott.com/*', action: 'same-tab', enabled: true },
+        { id: 'r-marriott-list', pattern: 'https://www.marriott.com/loyalty/findReservationList.mi*', action: 'same-tab', enabled: true },
       ],
     },
     {
