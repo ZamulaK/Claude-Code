@@ -43,7 +43,7 @@ makes no network requests — see [PRIVACY.md](PRIVACY.md).
 
 ## Tips & known quirks
 
-- When pinned to the toolbar, the icon shows a small blue **ON** badge on
+- When pinned to the toolbar, the icon shows a small blue **✓** badge on
   pages where the extension is active.
 - The version you're running is shown at the bottom of the popup and the
   settings page.
