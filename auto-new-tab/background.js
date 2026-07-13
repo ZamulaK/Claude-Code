@@ -12,6 +12,22 @@ if (chrome.action.setBadgeTextColor) {
   chrome.action.setBadgeTextColor({ color: '#ffffff' });
 }
 
+// On install or update, clear per-tab badges left by a previous version:
+// content scripts already running in open tabs are orphaned by the update
+// and cannot refresh their badge until the tab reloads.
+chrome.runtime.onInstalled.addListener(async () => {
+  try {
+    const tabs = await chrome.tabs.query({});
+    for (const tab of tabs) {
+      if (tab.id !== undefined) {
+        chrome.action.setBadgeText({ tabId: tab.id, text: '' }).catch(() => {});
+      }
+    }
+  } catch (e) {
+    // best effort
+  }
+});
+
 chrome.runtime.onMessage.addListener((message, sender) => {
   if (message && message.name === 'SetBadge' && sender.tab && sender.tab.id !== undefined) {
     chrome.action.setBadgeText({
