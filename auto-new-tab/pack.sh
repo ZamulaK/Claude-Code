@@ -6,7 +6,7 @@ mkdir -p dist
 rm -f dist/auto-new-tab.zip
 zip -r dist/auto-new-tab.zip \
   manifest.json \
-  common.js content.js \
+  background.js common.js content.js \
   options.html options.js \
   popup.html popup.js \
   styles.css \

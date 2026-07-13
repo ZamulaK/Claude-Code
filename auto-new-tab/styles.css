@@ -43,7 +43,7 @@ body.options .wrap {
   margin: 0 auto;
 }
 
-body.popup { width: 280px; max-width: 100%; }
+body.popup { width: 360px; max-width: 100%; }
 
 body.popup .wrap {
   display: flex;
@@ -53,7 +53,7 @@ body.popup .wrap {
 
 /* Browsers that render the popup as a full-width sheet (Edge and Quetta on
    Android) give it a wide viewport; use that space instead of a centered
-   280px column. Desktop popups size to the 280px body and never match. */
+   360px column. Desktop popups size to the 360px body and never match. */
 @media (min-width: 400px) {
   body.popup { width: 100%; }
 }

@@ -43,6 +43,8 @@ makes no network requests — see [PRIVACY.md](PRIVACY.md).
 
 ## Tips & known quirks
 
+- When pinned to the toolbar, the icon shows a small blue **ON** badge on
+  pages where the extension is active.
 - The version you're running is shown at the bottom of the popup and the
   settings page.
 - On some Android browsers the popup opens as a bottom sheet with an
@@ -69,6 +71,8 @@ Plain HTML/JS/CSS, Manifest V3, no build step:
 - `content.js` — a single delegated capture-phase click listener that decides
   at click time whether the clicked link gets `target="_blank"` +
   `rel="noopener"`; nothing runs until a link is clicked
+- `background.js` — minimal service worker that shows the per-tab ON badge
+  reported by the content script
 - `options.html` / `options.js` — settings UI · `popup.html` / `popup.js` —
   toolbar popup · `styles.css` — shared styles (layout lives on an inner
   wrapper because some mobile browsers override popup `body` styles)

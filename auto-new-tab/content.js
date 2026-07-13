@@ -5,21 +5,42 @@
 // site cards in chrome.storage. Nothing runs until a link is clicked, and
 // links added dynamically are covered automatically. The site lookup happens
 // per click against location.href, so single-page-app URL changes are handled.
+//
+// The script also reports the page's active state to the background service
+// worker, which shows an ON badge on the toolbar icon for active tabs.
 
 (function () {
   'use strict';
 
   let compiled = lntCompileConfig(LNT_DEFAULT_CONFIG);
 
+  function updateBadge() {
+    try {
+      chrome.runtime.sendMessage({
+        name: 'SetBadge',
+        active: lntIsActiveOn(compiled, location.href),
+      }).catch(() => {});
+    } catch (e) {
+      // extension context gone (e.g. right after an update); nothing to do
+    }
+  }
+
   lntLoadConfig().then((config) => {
     compiled = lntCompileConfig(config);
+    updateBadge();
   });
 
   chrome.storage.onChanged.addListener((changes) => {
     if (changes[LNT_STORAGE_KEY]) {
       compiled = lntCompileConfig(changes[LNT_STORAGE_KEY].newValue || LNT_DEFAULT_CONFIG);
+      updateBadge();
     }
   });
+
+  // Keep the badge in step with history/hash navigation and bfcache restores.
+  window.addEventListener('popstate', updateBadge);
+  window.addEventListener('hashchange', updateBadge);
+  window.addEventListener('pageshow', updateBadge);
 
   document.addEventListener('click', (event) => {
     const site = lntSiteForPage(compiled, location.href);
